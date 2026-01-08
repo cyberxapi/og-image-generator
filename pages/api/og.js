@@ -1,95 +1,115 @@
-export default function handler(req, res) {
-  const { name, id, username, members } = req.query;
+import { ImageResponse } from '@vercel/og';
 
-  // Set default values
-  const displayName = name || "UNKNOWN";
-  const displayId = id || "000000";
-  const displayUsername = username || "N/A";
-  const displayMembers = members || "0";
+export const config = {
+  runtime: 'edge',
+};
 
-  // Background pool
-  const backgrounds = [
-    "https://files.catbox.moe/apvuau.png",
-    // Add more background URLs here
-  ];
+export default async function handler(req) {
+  const { name, id, username, members } = req.nextUrl.searchParams;
 
-  const bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+  try {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            width: '1280px',
+            height: '720px',
+            backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            fontFamily: 'Arial, sans-serif',
+          }}
+        >
+          {/* Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '600px',
+              background: 'white',
+              borderRadius: '24px',
+              padding: '40px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            {/* Profile Section */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}
+            >
+              {/* DP Placeholder */}
+              <div
+                style={{
+                  width: '120px',
+                  height: '120px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '20px',
+                  color: 'white',
+                  fontSize: '50px',
+                  fontWeight: 'bold',
+                }}
+              >
+                {username?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
 
-  // Telegram DP URL
-  const dp = displayUsername !== "N/A"
-    ? `https://t.me/i/userpic/320/${displayUsername}.jpg`
-    : "https://files.catbox.moe/default_dp.png";
+              {/* Info */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <h2 style={{ margin: '0', fontSize: '32px', color: '#333' }}>
+                  {name || 'UNKNOWN'}
+                </h2>
+                <p style={{ margin: '5px 0 0 0', fontSize: '18px', color: '#666' }}>
+                  @{username || 'N/A'}
+                </p>
+              </div>
+            </div>
 
-  // SVG content
-  const svg = `
-<svg width="1280" height="720" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <image href="${bg}" width="1280" height="720"/>
+            {/* Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '12px 0',
+                  borderBottom: '1px solid #eee',
+                }}
+              >
+                <span style={{ fontSize: '18px', color: '#666' }}>ID:</span>
+                <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
+                  {id || '000000'}
+                </span>
+              </div>
 
-  <!-- INFO CARD -->
-  <defs>
-    <linearGradient id="cardBorder" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#93c5fd"/>
-      <stop offset="100%" stop-color="#fbcfe8"/>
-    </linearGradient>
-
-    <clipPath id="dpClip">
-      <circle cx="210" cy="210" r="78"/>
-    </clipPath>
-  </defs>
-
-  <!-- Card background -->
-  <rect x="50" y="50" rx="26" ry="26"
-    width="560" height="620"
-    fill="#ffffff" opacity="0.92"/>
-
-  <!-- Card border -->
-  <rect x="50" y="50" rx="26" ry="26"
-    width="560" height="620"
-    fill="none" stroke="url(#cardBorder)" stroke-width="6"/>
-
-  <!-- DP ring -->
-  <circle cx="210" cy="210" r="90" fill="#93c5fd"/>
-  <circle cx="210" cy="210" r="84" fill="#fbcfe8"/>
-  <circle cx="210" cy="210" r="78" fill="#ffffff"/>
-
-  <!-- Profile photo -->
-  <image href="${dp}"
-    x="132" y="132"
-    width="156" height="156"
-    clip-path="url(#dpClip)"
-    preserveAspectRatio="xMidYMid slice"/>
-
-  <!-- TEXT -->
-  <g font-family="Segoe UI, Inter, Arial, sans-serif">
-
-    <text x="110" y="350" font-size="34"
-      fill="#2563eb" font-weight="700">
-      ➻ NAME » <tspan fill="#0f172a">${displayName}</tspan>
-    </text>
-
-    <text x="110" y="410" font-size="30"
-      fill="#475569">
-      ➻ ID » ${displayId}
-    </text>
-
-    <text x="110" y="470" font-size="30"
-      fill="#2563eb">
-      ➻ U_NAME » <tspan fill="#0f172a">@${displayUsername}</tspan>
-    </text>
-
-    <text x="110" y="530" font-size="30"
-      fill="#475569">
-      ➻ TOTAL MEMBERS » ${displayMembers}
-    </text>
-
-  </g>
-
-</svg>
-  `;
-
-  // Set response headers
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  res.status(200).send(svg);
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '12px 0',
+                }}
+              >
+                <span style={{ fontSize: '18px', color: '#666' }}>Members:</span>
+                <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#667eea' }}>
+                  {members || '0'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        width: 1280,
+        height: 720,
+      }
+    );
+  } catch (error) {
+    return new Response('Error generating image', { status: 500 });
+  }
 }
