@@ -2,6 +2,7 @@ import { ImageResponse } from '@vercel/og';
 
 export const config = {
   runtime: 'edge',
+  responseLimit: '10 mb',
 };
 
 export default async function handler(req) {
@@ -14,7 +15,7 @@ export default async function handler(req) {
 
     const initials = username?.charAt(0)?.toUpperCase() || 'U';
 
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
@@ -161,7 +162,16 @@ export default async function handler(req) {
         height: 630,
       }
     );
-  } catch (e) {
-    return new Response('Failed to generate image', { status: 500 });
+
+    // Set proper headers for file download/attachment
+    imageResponse.headers.set('Content-Type', 'image/png');
+    imageResponse.headers.set('Content-Disposition', 'inline; filename="og-image.png"');
+    imageResponse.headers.set('Cache-Control', 'public, max-age=300, immutable');
+    imageResponse.headers.set('Accept-Ranges', 'bytes');
+    
+    return imageResponse;
+  } catch (error) {
+    console.error('Error:', error);
+    return new Response('Error generating image', { status: 500 });
   }
 }
